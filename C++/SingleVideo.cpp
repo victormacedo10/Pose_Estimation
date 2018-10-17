@@ -18,8 +18,8 @@ const int POSE_PAIRS[17][2] =
     {14,16}, {0,15}, {15,17}
 };
 
-string protoFile = "../pose/coco/pose_deploy_linevec.prototxt";
-string weightsFile = "../pose/coco/pose_iter_440000.caffemodel";
+string protoFile = "../../Models/pose/coco/pose_deploy_linevec.prototxt";
+string weightsFile = "../../Models/pose/coco/pose_iter_440000.caffemodel";
 
 int nPoints = 18;
 
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
     cout << "USAGE : ./openpose <VideoFile> " << endl;
     
-    string videoFile = "../Videos/bikefit.mp4";
+    string videoFile = "../Videos/strech.mp4";
     // Take arguments from commmand line
     if (argc == 2)
     {   
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     double t=0;
 
     ofstream ip;
-    ip.open("../Test_files/bikefit_t.txt");
+    ip.open("../Test_files/strech.txt");
 
     while( waitKey(1) < 0)
     {       
