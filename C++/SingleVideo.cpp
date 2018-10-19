@@ -25,10 +25,9 @@ int nPoints = 18;
 
 int main(int argc, char **argv)
 {
-
-    cout << "USAGE : ./openpose <VideoFile> " << endl;
-    
-    string videoFile = "../Videos/strech.mp4";
+    int cnt = 0;
+    string name = "victor";
+    string videoFile = "../Videos/" + name + ".mp4";
     // Take arguments from commmand line
     if (argc == 2)
     {   
@@ -41,8 +40,11 @@ int main(int argc, char **argv)
 
     cv::VideoCapture cap(videoFile);
 
+    int nframes = (int) cap.get(CAP_PROP_FRAME_COUNT);
+
     int fps = cap.get(CAP_PROP_FPS);
     cout << fps << endl;
+    cout << nframes << endl;
 
     Mat frame, frameCopy;
     int frameWidth = cap.get(CAP_PROP_FRAME_WIDTH);
@@ -52,7 +54,7 @@ int main(int argc, char **argv)
     double t=0;
 
     ofstream ip;
-    ip.open("../Test_files/strech.txt");
+    ip.open("../Test_files/" + name + ".txt");
 
     while( waitKey(1) < 0)
     {       
@@ -89,6 +91,8 @@ int main(int argc, char **argv)
             ip << p.x << " ";
             ip << p.y << " ";
         }
+        cnt++;
+        cout << "Progress: " << cnt << "/" << nframes << endl;
     }
     cap.release();
     ip.close();

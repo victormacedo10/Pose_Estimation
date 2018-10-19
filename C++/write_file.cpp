@@ -29,8 +29,8 @@ int nPoints = 18;
 int main(int argc, char **argv)
 {
     int key, m=1, i=0;
-    string name = "anatomical";
-    string imageFile = "../Photos/" + name + ".jpg";
+    string name = "gabriel";
+    string imageFile = "../Photos/" + name + ".jpeg";
     string imageAddr = "../Photos/" + name + ".txt";
     string imageSkeleton = "../Photos/" + name + "_Skeleton.jpg";
     // Take arguments from commmand line

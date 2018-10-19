@@ -53,28 +53,11 @@ POSE_PAIRS = [[1,2], [2,3], [3,4], [1,5],
 nPoints = 17
 
 
-p_prof = np.genfromtxt("../Photos/gabriel.txt",delimiter=' ',dtype=None, encoding=None)
-p_stud = np.genfromtxt("../Photos/victor.txt",delimiter=' ',dtype=None, encoding=None)
+p_prof = np.genfromtxt("../Photos/victor.txt",delimiter=' ',dtype=None, encoding=None)
+p_stud = np.genfromtxt("../Photos/gabriel.txt",delimiter=' ',dtype=None, encoding=None)
 
-frame = cv2.imread("../Photos/victor.jpeg")
+frame = cv2.imread("../Photos/leandro.jpg")
 frameCopy = np.copy(frame)
-
-# Draw Skeleton
-for n in range(nPoints):
-    partA = np.copy(p_stud[POSE_PAIRS[n][0],:])
-    partB = np.copy(p_stud[POSE_PAIRS[n][1],:])
-    partC = np.copy(p_stud[8,:])
-
-    if (n == 6):
-        partC[0] = np.int64((partB[0] + partC[0])/2)
-        partC[1] = np.int64((partB[1] + partC[1])/2)
-        cv2.line(frame, tuple(partA), tuple(partC), (0, 0, 0), 2)
-        cv2.circle(frame, tuple(partC), 3, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-    else:   
-        cv2.line(frame, tuple(partA), tuple(partB), (0, 0, 0), 2)
-        cv2.circle(frame, tuple(partA), 1, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-        cv2.circle(frame, tuple(partB), 1, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-        cv2.circle(frame, tuple(partC), 1, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
 
 d_prof = distance_measurement(POSE_PAIRS, p_prof, nPoints)
 a_prof = angle_measurement(POSE_PAIRS, p_prof, nPoints)
@@ -105,28 +88,6 @@ init = np.copy(p_stud[1,:])
 fim = np.copy(p_prof[1,:])
 offset = fim - init
 p_prof -= offset
-
-# Draw Skeleton
-for n in range(nPoints):
-    partA = np.copy(p_prof[POSE_PAIRS[n][0],:])
-    partB = np.copy(p_prof[POSE_PAIRS[n][1],:])
-    partC = np.copy(p_prof[8,:])
-
-    if (n == 6):
-        partC[0] = np.int64((partB[0] + partC[0])/2)
-        partC[1] = np.int64((partB[1] + partC[1])/2)
-        cv2.line(frame, tuple(partA), tuple(partC), (0, 255, 255), 3)
-        cv2.circle(frame, tuple(partC), 3, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-    else:   
-        cv2.line(frame, tuple(partA), tuple(partB), (0, 255, 255), 3)
-        cv2.circle(frame, tuple(partA), 3, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-        cv2.circle(frame, tuple(partB), 3, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-        cv2.circle(frame, tuple(partC), 3, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
-
-plt.figure(figsize=[10,10])
-plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-plt.grid(False)
-plt.show()
 
 dataset = pd.DataFrame({'d_stud':d_stud,'dp_prof':dp_prof,
                         'a_stud':a_stud,'ap_prof':ap_prof})

@@ -5,149 +5,166 @@
 #include <fstream>
 #include <unistd.h>
 #include <pthread.h>
+#include <string>
+#include <math.h>
 
-int j = 0;
-int fps = 20;
-int play = 0;
-int f_len = 0;
+#define PI 3.14159265
 
+using namespace std;
+using namespace cv;
+using namespace cv::dnn;
 
-int main(int argc, char **argv)
-{ 
+const int POSE_PAIRS[17][2] = 
+{   
+    {1,2}, {2,3}, {3,4},
+    {1,5}, {5,6}, {6,7},
+    {1,11}, {11,12}, {12,13},
+    {11,8}, {8,9}, {9,10},
+    {1,0}, {0,14},
+    {14,16}, {0,15}, {15,17}
+};
 
-    int key, m=1, i=0;
+int nPoints = 17;
 
-    int xc=0, yc=0, xs=0, ys=0;
+void angle_measure(vector<Point> points, vector<Point> *thetas){
+    double x, y, angle;
 
-    float size = 1;
+    for (int n = 0; n < nPoints; n++){
+        Point2f partA = points[POSE_PAIRS[n][0]];
+        Point2f partB = points[POSE_PAIRS[n][1]];
+        if((partB.x - partA.x) == 0){
+            thetas->push_back(Point(90.0));
+        }
+        else{
+            y = partB.x - partA.x;
+            x = partB.y - partA.y;
+            angle = atan(y/x) * 180 / PI;
+            if(angle > 0){
+                if(x<0 && y<0){
+                    angle += 180;
+                }
+            }
+            else if(angle < 0){
+                if(x<0 && y>0){
+                    angle +=180;
+                }
+            }
+            else{
+                if(x>0){
+                    angle = 0;
+                }
+                else if (x<0){
+                    angle = 180;
+                }
+                else{
+                    if (y>0){
+                        angle = 90;
+                    }
+                    else{
+                        angle = -90;
+                    }
+                }
+            }
+            thetas->push_back(Point(angle));
+        }
+    }
+}
+
+vector<float> distance_measure(vector<Point> points){
+    vector<float> d(nPoints-1);
+    for (int n = 0; n < nPoints; n++){
+        Point2f partA = points[POSE_PAIRS[n][0]];
+        Point2f partB = points[POSE_PAIRS[n][1]];
+        double Ax = partA.x;
+        double Bx = partB.x;
+        double Ay = partA.y;
+        double By = partA.y;
+        d[n] = sqrt(pow((Ax - Bx),2) + pow((Ay - By),2));
+    }
+    return d;
+}
+
+void readfile(vector<Point> *points, string file_path){
     double x, y;
 
     ifstream ip;
-    ip.open("../Test_files/strech.txt");
+    ip.open(file_path);
     if(!ip.is_open()){
         cout << "file does not exists:" << '\n';
     }
-    vector<Point> points(0);
+
     ip>>x;
     ip>>y;
-    points.push_back(Point((int) x,(int) y));
+    points->push_back(Point((int) x,(int) y));
     while(ip.good()){
         ip>>x;
         ip>>y;
-        points.push_back(Point((int) x,(int) y));
-        f_len++;
+        points->push_back(Point((int) x,(int) y));
     }
-    cout << f_len << endl;
+}
 
-    x=0;
-    y=0;
+int main(int argc, char **argv){ 
 
-    while(1) {
+    vector<Point> prof(0);
+    vector<Point> stud(0);
 
-        cap >> frame2;
-        flip(frame2,frame2,1);
+    string prof_name = "men";
+    string stud_name = "leandro";
+    string image = "../Photos/" + stud_name + ".jpg";
 
-        if (frame2.empty()) {
-            cerr << "ERROR: Unable to grab from the camera" << endl;
-            break;
+    Mat frame = imread(image);
+
+    namedWindow("Output-Skeleton", WINDOW_NORMAL);
+
+    readfile(&stud, "../Photos/" + stud_name + ".txt");
+    readfile(&prof, "../Photos/" + prof_name + ".txt");
+
+    for (int n = 0; n < nPoints; n++){
+
+        Point2f partA = stud[POSE_PAIRS[n][0]];
+        Point2f partB = stud[POSE_PAIRS[n][1]];
+        Point2f partC = stud[8];
+        if (n == 6){
+            partC.x = (partB.x + partC.x)/2;
+            partC.y = (partB.y + partC.y)/2;
+            line(frame, partA, partC, Scalar(0,0,0), 3);
         }
-
-        for (int n = 0; n < nPairs; n++){
-
-            Point2f partA = points[j+POSE_PAIRS[n][0]];
-            Point2f partB = points[j+POSE_PAIRS[n][1]];
-
-            partA.x = (partA.x + x)*size + xs;
-            partA.y = (partA.y + y)*size + ys;
-            partB.x = (partB.x + x)*size + xs;
-            partB.y = (partB.y + y)*size + ys;
-
-            if (n == 9){
-                Point2f partC = points[j+8];
-
-                partC.x = (partC.x + x)*size + xs;
-                partC.y = (partC.y + y)*size + ys;
-
-                partB.x = (partB.x + partC.x)/2;
-                partB.y = (partB.y + partC.y)/2;
-
-                xc = partB.x;
-                yc = partB.y;
-            }
-
-            if (partA.x<=0 || partA.y<=0 || partB.x<=0 || partB.y<=0)
-                            continue;
-
-            line(frame2, partA, partB, Scalar(0,0,0), 3);
-            circle(frame2, partA, 3, Scalar(0,0,255), -1);
-            circle(frame2, partB, 3, Scalar(0,0,255), -1);
+        else{
+            line(frame, partA, partB, Scalar(0,0,0), 3);
+            circle(frame, partA, 3, Scalar(0,0,255), -1);
+            circle(frame, partB, 3, Scalar(0,0,255), -1);
         }
-
-        imshow("Live",frame2);
-        key = cv::waitKey(1);
-        if (key==120){
-            break;
-        }
-        else if(key>=49 && key<=57){
-            m = 2*(key - 48);
-        }
-        else if(key==81){
-            for (int n = 0; n < nPoints; n++){
-                x -= m;
-            }
-        }
-        else if(key==83){
-            for (int n = 0; n < nPoints; n++){
-                x += m;
-            }
-        }
-        else if(key==84){
-            for (int n = 0; n < nPoints; n++){
-                y += m;
-            }
-        }
-        else if(key==82){
-            for (int n = 0; n < nPoints; n++){
-                y -= m;
-            }
-        }
-        else if(key==32){
-            play = 1;
-        }
-        else if(key==171){
-            if(size<5)
-                size+=0.02;
-                cout << "size = " << size << endl;
-                cout << "{xc, yc} = ";
-                cout << xc << " " << yc << endl;
-                cout << "{x, y}a = ";
-                cout << x << " " << y  << endl;
-                xs = xc*(1-size);
-                ys = yc*(1-size);
-                cout << "{x, y}d = ";
-                cout << x  << " " << y << endl;
-        }
-        else if(key==173){
-            if(size>0){
-                size-=0.02;
-                cout << "size = " << size << endl;
-                cout << "{xc, yc} = ";
-                cout << xc << " " << yc << endl;
-                cout << "{x, y}a = ";
-                cout << x << " " << y  << endl;
-                xs = xc*(1-size);
-                ys = yc*(1-size);
-                cout << "{x, y}d = ";
-                cout << x  << " " << y << endl;
-            }
-        }
-
+        circle(frame, partC, 3, Scalar(0,0,255), -1);
     }
 
-    cout << "Closing the camera" << endl;
-    cap.release();
-    destroyAllWindows();
-    cout << "bye!" <<endl;
-    cout << frame2.size();
+    //cout << prof << endl;
+
+    vector<float> d_prof(nPoints-1);
+    d_prof = distance_measure(prof);
+
+    for (int n = 0; n < nPoints; n++){
+        //cout << d_prof[n] << endl;
+    }
+
+    for (int n = 0; n < nPoints; n++){
+
+        Point2f partA = prof[POSE_PAIRS[n][0]];
+        Point2f partB = prof[POSE_PAIRS[n][1]];
+        Point2f partC = prof[8];
+        if (n == 6){
+            partC.x = (partB.x + partC.x)/2;
+            partC.y = (partB.y + partC.y)/2;
+            line(frame, partA, partC, Scalar(0, 255, 255), 3);
+        }
+        else{
+            line(frame, partA, partB, Scalar(0, 255, 255), 3);
+            circle(frame, partA, 8, Scalar(0,0,255), -1);
+            circle(frame, partB, 8, Scalar(0,0,255), -1);
+        }
+        circle(frame, partC, 8, Scalar(0,0,255), -1);
+    }
+    cout << "imshow" << endl;
+    imshow("Output-Skeleton",frame);
+    waitKey();
     return 0;
 }
