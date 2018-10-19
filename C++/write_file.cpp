@@ -29,10 +29,10 @@ int nPoints = 18;
 int main(int argc, char **argv)
 {
     int key, m=1, i=0;
-
-    string imageFile = "../Photos/leandro.jpg";
-    string imageAddr = "../Photos/leandro.txt";
-    string imageSkeleton = "../Photos/leandro_Skeleton.jpg";
+    string name = "anatomical";
+    string imageFile = "../Photos/" + name + ".jpg";
+    string imageAddr = "../Photos/" + name + ".txt";
+    string imageSkeleton = "../Photos/" + name + "_Skeleton.jpg";
     // Take arguments from commmand line
     if (argc == 2){   
       string arg = argv[1];

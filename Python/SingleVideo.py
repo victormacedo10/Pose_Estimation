@@ -2,33 +2,7 @@ import cv2
 import time
 import numpy as np
 
-MODE = "MPI"
-
-if MODE is "COCO":
-    protoFile = "pose/coco/pose_deploy_linevec.prototxt"
-    weightsFile = "pose/coco/pose_iter_440000.caffemodel"
-    nPoints = 18
-    POSE_PAIRS = [ [1,0],[1,2],[1,5],[2,3],[3,4],[5,6],[6,7],[1,8],[8,9],[9,10],[1,11],[11,12],[12,13],[0,14],[0,15],[14,16],[15,17]]
-
-elif MODE is "MPI" :
-    protoFile = "pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
-    weightsFile = "pose/mpi/pose_iter_160000.caffemodel"
-    nPoints = 15
-    POSE_PAIRS = [[0,1], [1,2], [2,3], [3,4], [1,5], [5,6], [6,7], [1,14], [14,8], [8,9], [9,10], [14,11], [11,12], [12,13] ]
-
-
-inWidth = 368
-inHeight = 368
-threshold = 0.1
-
-
 input_source = "Videos/bikefit.mp4"
-cap = cv2.VideoCapture(input_source)
-hasFrame, frame = cap.read()
-
-vid_writer = cv2.VideoWriter('output.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 10, (frame.shape[1],frame.shape[0]))
-
-net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
 while cv2.waitKey(1) < 0:
     t = time.time()
