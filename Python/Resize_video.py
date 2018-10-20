@@ -43,8 +43,33 @@ def distance_measurement (POSE_PAIRS, p_prof, nPoints):
         d.append(float(np.sqrt((partA[0] - partB[0])**2+(partA[1]-partB[1])**2)))
     return np.array(d)
 
-plt.close('all')
-
+def resize_func (p_prof, p_stud, nPoints, POSE_PAIRS):
+    a_prof = angle_measurement(POSE_PAIRS, p_prof, nPoints)
+    
+    d_stud = distance_measurement(POSE_PAIRS, p_stud, nPoints)
+    
+    dif = 0
+    
+    for n in range(nPoints):
+        partA = np.copy(p_prof[POSE_PAIRS[n][0],:])
+        partB = np.copy(p_prof[POSE_PAIRS[n][1],:]) + dif
+        
+        partB[0] = d_stud[n] * np.cos(np.deg2rad(a_prof[n])) + partA[0]
+        partB[1]  = d_stud[n] * np.sin(np.deg2rad(a_prof[n])) + partA[1]
+    
+        if(n==0 or n==3 or n==6 or n==9 or n==12 or n==15):
+            dif = 0
+        else:
+            dif = partB - p_prof[POSE_PAIRS[n][1],:]
+    
+        p_prof[POSE_PAIRS[n][1],:] = partB
+        
+    init = np.copy(p_stud[1,:])
+    fim = np.copy(p_prof[1,:])
+    offset = fim - init
+    p_prof -= offset
+    return p_prof
+    
 POSE_PAIRS = [[1,2], [2,3], [3,4], [1,5], 
              [5,6], [6,7], [1,11], [11,12],
              [12,13], [11,8], [8,9], [9,10],
@@ -52,42 +77,7 @@ POSE_PAIRS = [[1,2], [2,3], [3,4], [1,5],
 
 nPoints = 17
 
-
-p_prof = np.genfromtxt("../Photos/victor.txt",delimiter=' ',dtype=None, encoding=None)
 p_stud = np.genfromtxt("../Photos/gabriel.txt",delimiter=' ',dtype=None, encoding=None)
+p_prof = resize_func(p_prof, p_stud, nPoints, POSE_PAIRS)
 
-frame = cv2.imread("../Photos/leandro.jpg")
-frameCopy = np.copy(frame)
 
-d_prof = distance_measurement(POSE_PAIRS, p_prof, nPoints)
-a_prof = angle_measurement(POSE_PAIRS, p_prof, nPoints)
-
-d_stud = distance_measurement(POSE_PAIRS, p_stud, nPoints)
-a_stud = angle_measurement(POSE_PAIRS, p_stud, nPoints)
-
-dif = 0
-
-for n in range(nPoints):
-    partA = np.copy(p_prof[POSE_PAIRS[n][0],:])
-    partB = np.copy(p_prof[POSE_PAIRS[n][1],:]) + dif
-    
-    partB[0] = d_stud[n] * np.cos(np.deg2rad(a_prof[n])) + partA[0]
-    partB[1]  = d_stud[n] * np.sin(np.deg2rad(a_prof[n])) + partA[1]
-
-    if(n==0 or n==3 or n==6 or n==9 or n==12 or n==15):
-        dif = 0
-    else:
-        dif = partB - p_prof[POSE_PAIRS[n][1],:]
-
-    p_prof[POSE_PAIRS[n][1],:] = partB
-    
-dp_prof = distance_measurement(POSE_PAIRS, p_prof, nPoints)
-ap_prof = angle_measurement(POSE_PAIRS, p_prof, nPoints)
-    
-init = np.copy(p_stud[1,:])
-fim = np.copy(p_prof[1,:])
-offset = fim - init
-p_prof -= offset
-
-dataset = pd.DataFrame({'d_stud':d_stud,'dp_prof':dp_prof,
-                        'a_stud':a_stud,'ap_prof':ap_prof})

@@ -24,12 +24,12 @@ const int POSE_PAIRS[17][2] =
 string protoFile = "../../Models/pose/coco/pose_deploy_linevec.prototxt";
 string weightsFile = "../../Models/pose/coco/pose_iter_440000.caffemodel";
 
-int nPoints = 18;
+int nPoints = 17;
 
 int main(int argc, char **argv)
 {
     int key, m=1, i=0;
-    string name = "gabriel";
+    string name = "victor";
     string imageFile = "../Photos/" + name + ".jpeg";
     string imageAddr = "../Photos/" + name + ".txt";
     string imageSkeleton = "../Photos/" + name + "_Skeleton.jpg";
@@ -96,7 +96,7 @@ int main(int argc, char **argv)
         key = cv::waitKey(3);
         if(key!=-1)
             frame = frameCopy.clone();
-            for (int n = 0; n < nPairs; n++){
+            for (int n = 0; n < nPoints-4; n++){
                 // lookup 2 connected body/hand parts
                 Point2f partA = points[POSE_PAIRS[n][0]];
                 Point2f partB = points[POSE_PAIRS[n][1]];
@@ -110,15 +110,15 @@ int main(int argc, char **argv)
                 if (partA.x<=0 || partA.y<=0 || partB.x<=0 || partB.y<=0)
                     continue;
 
-                line(frame, partA, partB, Scalar(0,0,0), 3);
+                line(frame, partA, partB, Scalar(0,0,0), 2);
                 if(POSE_PAIRS[n][0]==i)
-                    circle(frame, partA, 3, Scalar(0,255,255), -1);
+                    circle(frame, partA, 2, Scalar(0,255,255), -1);
                 else
-                    circle(frame, partA, 3, Scalar(0,0,255), -1);
+                    circle(frame, partA, 2, Scalar(0,0,255), -1);
                 if(POSE_PAIRS[n][1]==i)
-                    circle(frame, partB, 3, Scalar(0,255,255), -1);
+                    circle(frame, partB, 2, Scalar(0,255,255), -1);
                 else
-                    circle(frame, partB, 3, Scalar(0,0,255), -1);
+                    circle(frame, partB, 2, Scalar(0,0,255), -1);
             }
         if (key==120){
             break;
@@ -155,5 +155,15 @@ int main(int argc, char **argv)
         ip << points[n].y << endl;
     }
     ip.close();
+
+    for (int n=0; n < nPoints-3; n++)
+    {
+        Point2f part = points[n];
+
+        circle(frameCopy, cv::Point((int)part.x, (int)part.y), 2, Scalar(0,255,255), -1);
+        putText(frameCopy, cv::format("%d", n), cv::Point((int)part.x, (int)part.y), cv::FONT_HERSHEY_COMPLEX, 0.3, cv::Scalar(0, 0, 255), 0.3);
+    }
+    imwrite("Output-Keypoints.jpg", frameCopy);
+
     return 0;
 }

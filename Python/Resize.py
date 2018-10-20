@@ -32,7 +32,6 @@ def angle_measurement(POSE_PAIRS, p_prof, nPoints):
                     if (y<0):
                         angle = -90
             teta.append(angle)
-    print(teta)
     return np.array(teta)
 
 def distance_measurement (POSE_PAIRS, p_prof, nPoints):
@@ -69,7 +68,7 @@ for n in range(nPoints):
         partC[0] = np.int64((partB[0] + partC[0])/2)
         partC[1] = np.int64((partB[1] + partC[1])/2)
         cv2.line(frame, tuple(partA), tuple(partC), (0, 0, 0), 2)
-        cv2.circle(frame, tuple(partC), 3, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
+        cv2.circle(frame, tuple(partC), 1, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
     else:   
         cv2.line(frame, tuple(partA), tuple(partB), (0, 0, 0), 2)
         cv2.circle(frame, tuple(partA), 1, (0, 0, 255), thickness=-1, lineType=cv2.FILLED)
