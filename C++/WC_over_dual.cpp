@@ -73,7 +73,7 @@ int main(int argc, char **argv)
 	pthread_t thread_id2;
 	pthread_create (&thread_id2, NULL, &playback2, NULL);
 
-	int x_off = 100, y_off = -10;
+	int x_off = 0, y_off = 0;
 
 	Mat frame;
 
@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     cout << fps << endl;
 
 	ifstream ip1;
-    ip1.open("../Test_files/gabriel.txt");
+    ip1.open("../Test_files/victor.txt");
     if(!ip1.is_open()){
         cout << "file does not exists:" << '\n';
     }
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 	cout << f_len1 << endl;
 
 	ifstream ip2;
-    ip2.open("../Test_files/gabriel_victor.txt");
+    ip2.open("../Test_files/victor_gabriel.txt");
     if(!ip2.is_open()){
         cout << "file does not exists:" << '\n';
     }

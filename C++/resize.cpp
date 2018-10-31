@@ -33,7 +33,12 @@ vector<float> angle_measure(vector<Point> points){
         Point2f partA = points[POSE_PAIRS[n][0]];
         Point2f partB = points[POSE_PAIRS[n][1]];
         if((partB.x - partA.x) == 0){
-            thetas[n] = 90;
+            if(partA.y > partB.y){
+                thetas[n] = -90;
+            }
+            else{
+                thetas[n] = 90;
+            }
         }
         else{
             x = partB.x - partA.x;

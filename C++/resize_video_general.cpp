@@ -33,7 +33,12 @@ vector<float> angle_measure(vector<Point> points){
         Point2f partA = points[POSE_PAIRS[n][0]];
         Point2f partB = points[POSE_PAIRS[n][1]];
         if((partB.x - partA.x) == 0){
-            thetas[n] = 90;
+            if(partA.y > partB.y){
+                thetas[n] = -90;
+            }
+            else{
+                thetas[n] = 90;
+            }
         }
         else{
             x = partB.x - partA.x;
@@ -161,8 +166,8 @@ int main(int argc, char **argv){
     vector<Point> stud(0);
     vector<Point> video_prof(0);
 
-    string prof_name = "gabriel";
-    string stud_name = "victor";
+    string prof_name = "victor";
+    string stud_name = "gabriel";
     string image = "../Photos/" + stud_name + ".jpeg";
 
     Mat frame = imread(image);

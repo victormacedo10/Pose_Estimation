@@ -27,13 +27,19 @@ const int POSE_PAIRS[17][2] =
 int nPoints = 17;
 
 vector<float> angle_measure(vector<Point> points){
+    cout << "angulos:" << endl;
     double x, y, angle;
     vector<float> thetas(nPoints);
     for (int n = 0; n < nPoints; n++){
         Point2f partA = points[POSE_PAIRS[n][0]];
         Point2f partB = points[POSE_PAIRS[n][1]];
         if((partB.x - partA.x) == 0){
-            thetas[n] = 90;
+            if(partA.y > partB.y){
+                thetas[n] = -90;
+            }
+            else{
+                thetas[n] = 90;
+            }
         }
         else{
             x = partB.x - partA.x;
@@ -46,7 +52,7 @@ vector<float> angle_measure(vector<Point> points){
             }
             else if(angle < 0){
                 if(x<0 && y>0){
-                    angle +=180;
+                    angle += 180;
                 }
             }
             else{
@@ -60,14 +66,17 @@ vector<float> angle_measure(vector<Point> points){
                     if (y>0){
                         angle = 90;
                     }
-                    if (y<0){
+                    if (y<=0){
                         angle = -90;
                     }
                 }
             }
             thetas[n] = angle;
         }
+        cout << thetas[n] << endl;
     }
+    cout << "finish" << endl;
+    cout << endl;
     return thetas;
 }
 
@@ -182,34 +191,13 @@ int main(int argc, char **argv){
 
     for (int n = 0; n < nPoints; n++){
         factor[n] = d_stud[n]/d_prof[n];
-        cout << factor[n] << endl;
     }
 
-    int j = 50;
+    int j = 1;
 
     for (int n = 0; n < nPoints+1; n++){
         prof[n] = video_prof[n + (nPoints+1)*j];
     }
-
-    for (int n = 0; n < nPoints-4; n++){
-
-        Point2f partA = prof[POSE_PAIRS[n][0]];
-        Point2f partB = prof[POSE_PAIRS[n][1]];
-        Point2f partC = prof[8];
-        if (n == 6){
-            partC.x = (partB.x + partC.x)/2;
-            partC.y = (partB.y + partC.y)/2;
-            line(frame, partA, partC, Scalar(0, 255, 255), 1);
-        }
-        else{
-            line(frame, partA, partB, Scalar(0, 255, 255), 1);
-            circle(frame, partA, 1, Scalar(0,255,0), -1);
-            circle(frame, partB, 1, Scalar(0,255,0), -1);
-        }
-        circle(frame, partC, 1, Scalar(0,255,0), -1);
-    }
-
-    prof = resize_funtion(prof, factor, offset);
 
     for (int n = 0; n < nPoints-4; n++){
 
@@ -228,7 +216,26 @@ int main(int argc, char **argv){
         }
         circle(frame, partC, 1, Scalar(0,0,255), -1);
     }
-    cout << prof.size() << endl;
+
+    prof = resize_funtion(prof, factor, offset);
+
+    for (int n = 0; n < nPoints-4; n++){
+
+        Point2f partA = prof[POSE_PAIRS[n][0]];
+        Point2f partB = prof[POSE_PAIRS[n][1]];
+        Point2f partC = prof[8];
+        if (n == 6){
+            partC.x = (partB.x + partC.x)/2;
+            partC.y = (partB.y + partC.y)/2;
+            line(frame, partA, partC, Scalar(0, 255, 255), 1);
+        }
+        else{
+            line(frame, partA, partB, Scalar(0, 255, 255), 1);
+            circle(frame, partA, 1, Scalar(0,255,0), -1);
+            circle(frame, partB, 1, Scalar(0,255,0), -1);
+        }
+        circle(frame, partC, 1, Scalar(0,255,0), -1);
+    }
 
     cout << "imshow" << endl;
     imshow("Output-Skeleton",frame);
