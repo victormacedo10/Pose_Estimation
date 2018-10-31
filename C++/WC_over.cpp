@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 
 	int nPairs = sizeof(POSE_PAIRS)/sizeof(POSE_PAIRS[0]);
 	
-    int nPoints = 17;
+    int nPoints = 18;
     double x, y;
 
 	VideoCapture cap(0);
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
 	cout << "Start grabbing, press space on Live window to terminate" << endl;
 	
 	ifstream ip;
-    ip.open("../Test_files/victor.txt");
+    ip.open("../Test_files/gabriel_victor.txt");
     if(!ip.is_open()){
         cout << "file does not exists:" << '\n';
     }
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 			break;
 		}
 
-		for (int n = 0; n < nPoints-4; n++){
+		for (int n = 0; n < nPoints-5; n++){
 
 			Point2f partA = points[j+POSE_PAIRS[n][0]];
 			Point2f partB = points[j+POSE_PAIRS[n][1]];

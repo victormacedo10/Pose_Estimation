@@ -1,5 +1,24 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <opencv2/dnn.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <pthread.h>
+
+using namespace std;
+using namespace cv;
+using namespace cv::dnn;
+
+int j = 0;
+int fps = 20;
+int play = 0;
+int f_len = 0;
+int key;
+
+VideoCapture cap(0);
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,46 +36,18 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_startBtn_pressed()
 {
-    using namespace cv;
 
-    if(video.isOpened())
-    {
-        ui->startBtn->setText("Start");
-        video.release();
+    if (!cap.isOpened()) {
+        cerr << "ERROR: Unable to open the camera" << endl;
         return;
-    }
-
-    bool isCamera;
-    int cameraIndex = ui->videoEdit->text().toInt(&isCamera);
-    if(isCamera)
-    {
-        if(!video.open(cameraIndex))
-        {
-            QMessageBox::critical(this,
-                                  "Camera Error",
-                                  "Make sure you entered a correct camera index,"
-                                  "<br>or that the camera is not being accessed by another program!");
-            return;
-        }
-    }
-    else
-    {
-        if(!video.open(ui->videoEdit->text().trimmed().toStdString()))
-        {
-            QMessageBox::critical(this,
-                                  "Video Error",
-                                  "Make sure you entered a correct and supported video file path,"
-                                  "<br>or a correct RTSP feed URL!");
-            return;
-        }
     }
 
     ui->startBtn->setText("Stop");
 
     Mat frame;
-    while(video.isOpened())
+    while(1)
     {
-        video >> frame;
+        cap >> frame;
         if(!frame.empty())
         {
             copyMakeBorder(frame,
@@ -76,14 +67,17 @@ void MainWindow::on_startBtn_pressed()
             ui->graphicsView->fitInView(&pixmap, Qt::KeepAspectRatio);
         }
         qApp->processEvents();
+        if(ui->videoEdit->text().toInt() == 1)
+        {
+            cap.release();
+        }
     }
-
     ui->startBtn->setText("Start");
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if(video.isOpened())
+    if(cap.isOpened())
     {
         QMessageBox::warning(this,
                              "Warning",

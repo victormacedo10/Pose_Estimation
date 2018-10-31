@@ -28,7 +28,7 @@ int nPoints = 17;
 
 vector<float> angle_measure(vector<Point> points){
     double x, y, angle;
-    vector<float> thetas(nPoints-1);
+    vector<float> thetas(nPoints);
     for (int n = 0; n < nPoints; n++){
         Point2f partA = points[POSE_PAIRS[n][0]];
         Point2f partB = points[POSE_PAIRS[n][1]];
@@ -72,7 +72,7 @@ vector<float> angle_measure(vector<Point> points){
 }
 
 vector<float> distance_measure(vector<Point> points){
-    vector<float> d(nPoints-1);
+    vector<float> d(nPoints);
     for (int n = 0; n < nPoints; n++){
         Point2f partA = points[POSE_PAIRS[n][0]];
         Point2f partB = points[POSE_PAIRS[n][1]];
@@ -95,10 +95,6 @@ void readfile(vector<Point> *points, string file_path){
     if(!ip.is_open()){
         cout << "file does not exists:" << '\n';
     }
-
-    ip>>x;
-    ip>>y;
-    points->push_back(Point((int) x,(int) y));
     while(ip.good()){
         ip>>x;
         ip>>y;
@@ -106,42 +102,10 @@ void readfile(vector<Point> *points, string file_path){
     }
 }
 
-int main(int argc, char **argv){ 
+vector<Point> resize_funtion(vector<Point> prof, vector<Point> stud){
 
-    vector<Point> prof(0);
-    vector<Point> stud(0);
-
-    string prof_name = "victor";
-    string stud_name = "gabriel";
-    string image = "../Photos/" + stud_name + ".jpeg";
-
-    Mat frame = imread(image);
-
-    namedWindow("Output-Skeleton", WINDOW_NORMAL);
-
-    readfile(&stud, "../Photos/" + stud_name + ".txt");
-    readfile(&prof, "../Photos/" + prof_name + ".txt");
-
-    for (int n = 0; n < nPoints-4; n++){
-
-        Point2f partA = stud[POSE_PAIRS[n][0]];
-        Point2f partB = stud[POSE_PAIRS[n][1]];
-        Point2f partC = stud[8];
-        if (n == 6){
-            partC.x = (partB.x + partC.x)/2;
-            partC.y = (partB.y + partC.y)/2;
-            line(frame, partA, partC, Scalar(0,0,0), 1);
-        }
-        else{
-            line(frame, partA, partB, Scalar(0,0,0), 1);
-            circle(frame, partA, 1, Scalar(0,0,255), -1);
-            circle(frame, partB, 1, Scalar(0,0,255), -1);
-        }
-        circle(frame, partC, 1, Scalar(0,0,255), -1);
-    }
-
-    vector<float> d_stud(nPoints-1);
-    vector<float> a_prof(nPoints-1);
+    vector<float> d_stud(nPoints);
+    vector<float> a_prof(nPoints);
 
     d_stud = distance_measure(stud);
     a_prof = angle_measure(prof);
@@ -169,13 +133,11 @@ int main(int argc, char **argv){
         prof[POSE_PAIRS[n][1]] = partB;
     }
 
-    vector<float> dp_prof(nPoints-1);
-    vector<float> ap_prof(nPoints-1);
+    vector<float> dp_prof(nPoints);
+    vector<float> ap_prof(nPoints);
 
     dp_prof = distance_measure(prof);
     ap_prof = angle_measure(prof);
-
-
 
     Point2f offset = prof[1] - stud[1];
 
@@ -185,26 +147,50 @@ int main(int argc, char **argv){
         prof[n] = p_prof;
     }
 
-    for (int n = 0; n < nPoints-4; n++){
+    return prof;
+}
 
-        Point2f partA = prof[POSE_PAIRS[n][0]];
-        Point2f partB = prof[POSE_PAIRS[n][1]];
-        Point2f partC = prof[8];
-        if (n == 6){
-            partC.x = (partB.x + partC.x)/2;
-            partC.y = (partB.y + partC.y)/2;
-            line(frame, partA, partC, Scalar(0, 255, 255), 1);
+int main(int argc, char **argv){ 
+
+    int n_joints = 18;
+
+    vector<Point> prof(0);
+    vector<Point> stud(0);
+    vector<Point> video_prof(0);
+
+    string prof_name = "victor";
+    string stud_name = "gabriel";
+    string image = "../Photos/" + stud_name + ".jpeg";
+
+    Mat frame = imread(image);
+
+    namedWindow("Output-Skeleton", WINDOW_NORMAL);
+
+    readfile(&stud, "../Photos/" + stud_name + ".txt");
+    readfile(&prof, "../Photos/" + prof_name + ".txt");
+    readfile(&video_prof, "../Test_files/" + prof_name + ".txt");
+
+    ofstream ip;
+    ip.open("../Test_files/" + prof_name + "_" + stud_name + ".txt");
+
+    int n_frames = (int) video_prof.size()/stud.size();
+    for (int j = 0; j < n_frames; j++){
+        for (int n = 0; n < n_joints; n++){
+            prof[n] = video_prof[n + n_joints*j];
         }
-        else{
-            line(frame, partA, partB, Scalar(0, 255, 255), 1);
-            circle(frame, partA, 1, Scalar(0,0,255), -1);
-            circle(frame, partB, 1, Scalar(0,0,255), -1);
+
+        prof = resize_funtion(prof, stud);
+
+        for (int n=0; n < n_joints; n++){
+            ip << prof[n].x << " ";
+            ip << prof[n].y << endl;
         }
-        circle(frame, partC, 1, Scalar(0,0,255), -1);
+        cout << j + 1 << "/" << n_frames << endl;
     }
-
-    cout << "imshow" << endl;
-    imshow("Output-Skeleton",frame);
-    waitKey();
+    
+    ip.close();
+    cout << "finished" << endl;
     return 0;
+
+
 }
