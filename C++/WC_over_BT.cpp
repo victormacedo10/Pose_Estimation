@@ -209,7 +209,7 @@ int main(int argc, char **argv){
 		cout << "Start grabbing, press space on Live window to terminate" << endl;
 		
 		ifstream ip;
-	    ip.open("../Test_files/gabriel_victor.txt");
+	    ip.open("../Videos/gabriel_victor.txt");
 	    if(!ip.is_open()){
 	        cout << "file does not exists:" << '\n';
 	    }

@@ -47,7 +47,6 @@ void* playback(void* dummy_ptr)
 
 int main(int argc, char **argv)
 { 
-
 	pthread_t thread_id1;
 	pthread_create (&thread_id1, NULL, &playback, NULL);
 
@@ -62,6 +61,11 @@ int main(int argc, char **argv)
     int nPoints = 18;
     double x, y;
 
+    string prof_name = "victor";
+    string resize_addr = "./resize_video_general " + prof_name;
+    const char* resize_addr1 = resize_addr.c_str();
+    system(resize_addr1);
+
 	VideoCapture cap(0);
 	if (!cap.isOpened()) {
 		cerr << "ERROR: Unable to open the camera" << endl;
@@ -75,7 +79,7 @@ int main(int argc, char **argv)
 	cout << "Start grabbing, press space on Live window to terminate" << endl;
 	
 	ifstream ip;
-    ip.open("../Test_files/gabriel_victor.txt");
+    ip.open("../Videos/" + prof_name + "_stick.txt");
     if(!ip.is_open()){
         cout << "file does not exists:" << '\n';
     }

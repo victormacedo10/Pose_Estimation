@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     double t=0;
 
     ofstream ip;
-    ip.open("../Test_files/" + name + ".txt");
+    ip.open("../Videos/" + name + ".txt");
 
     while( waitKey(1) < 0)
     {       

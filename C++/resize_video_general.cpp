@@ -158,7 +158,7 @@ vector<Point> resize_funtion(vector<Point> prof, vector<float> factor, Point2f o
     return prof;
 }
 
-int main(int argc, char **argv){ 
+int main(int argc, char* argv[]){ 
 
     int n_joints = 18;
 
@@ -166,17 +166,24 @@ int main(int argc, char **argv){
     vector<Point> stud(0);
     vector<Point> video_prof(0);
 
-    string prof_name = "victor";
-    string stud_name = "gabriel";
-    string image = "../Photos/" + stud_name + ".jpeg";
+    //string prof_name = "victor";
+    //char* prof_tmp;
+    const char* prof_tmp = "victor";
+    if(argc>0){
+        const char* prof_tmp = argv[1];
+    }
+    string prof_name(prof_tmp);
+
+    string stud_name = "stick";
+    string image = "../Users/" + stud_name + ".jpeg";
 
     Mat frame = imread(image);
 
     namedWindow("Output-Skeleton", WINDOW_NORMAL);
 
-    readfile(&stud, "../Photos/" + stud_name + ".txt");
-    readfile(&prof, "../Photos/" + prof_name + ".txt");
-    readfile(&video_prof, "../Test_files/" + prof_name + ".txt");
+    readfile(&stud, "../Users/" + stud_name + ".txt");
+    readfile(&prof, "../Users/" + prof_name + ".txt");
+    readfile(&video_prof, "../Videos/" + prof_name + ".txt");
 
     Point2f offset = prof[1] - stud[1];
 
@@ -197,7 +204,7 @@ int main(int argc, char **argv){
     }
 
     ofstream ip;
-    ip.open("../Test_files/" + prof_name + "_" + stud_name + ".txt");
+    ip.open("../Videos/" + prof_name + "_" + stud_name + ".txt");
 
     int n_frames = (int) video_prof.size()/stud.size();
     for (int j = 0; j < n_frames; j++){
@@ -217,6 +224,4 @@ int main(int argc, char **argv){
     ip.close();
     cout << "finished" << endl;
     return 0;
-
-
 }
