@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char **argv)
 {
-
+    
     string port = "/dev/rfcomm0";
     int device = open(port.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
 

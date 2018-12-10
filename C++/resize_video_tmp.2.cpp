@@ -33,12 +33,7 @@ vector<float> angle_measure(vector<Point> points){
         Point2f partA = points[POSE_PAIRS[n][0]];
         Point2f partB = points[POSE_PAIRS[n][1]];
         if((partB.x - partA.x) == 0){
-            if(partA.y > partB.y){
-                thetas[n] = -90;
-            }
-            else{
-                thetas[n] = 90;
-            }
+            thetas[n] = 90;
         }
         else{
             x = partB.x - partA.x;
@@ -107,18 +102,13 @@ void readfile(vector<Point> *points, string file_path){
     }
 }
 
-vector<Point> resize_funtion(vector<Point> prof, vector<float> factor, Point2f offset){
+vector<Point> resize_funtion(vector<Point> prof, vector<Point> stud){
 
-    vector<float> a_prof(nPoints);
     vector<float> d_stud(nPoints);
-    vector<float> d_prof(nPoints);
+    vector<float> a_prof(nPoints);
 
-    d_prof = distance_measure(prof);
+    d_stud = distance_measure(stud);
     a_prof = angle_measure(prof);
-
-    for (int n = 0; n < nPoints; n++){
-        d_stud[n] = d_prof[n]*factor[n];
-    }
 
     int dif[2] = {0};
 
@@ -149,6 +139,8 @@ vector<Point> resize_funtion(vector<Point> prof, vector<float> factor, Point2f o
     dp_prof = distance_measure(prof);
     ap_prof = angle_measure(prof);
 
+    Point2f offset = prof[1] - stud[1];
+
     for (int n = 0; n < nPoints+1; n++){
         Point2f p_prof = prof[n];
         p_prof -= offset;
@@ -158,7 +150,7 @@ vector<Point> resize_funtion(vector<Point> prof, vector<float> factor, Point2f o
     return prof;
 }
 
-int main(int argc, char* argv[]){ 
+int main(int argc, char **argv){ 
 
     int n_joints = 18;
 
@@ -166,53 +158,20 @@ int main(int argc, char* argv[]){
     vector<Point> stud(0);
     vector<Point> video_prof(0);
 
-    const char* prof_tmp = "victor";
-    const char* stud_tmp = "gabriel";
-    if(argc>2){
-        cout << "in" << endl;
-        prof_tmp = argv[1];
-        stud_tmp = argv[2];
-    }
-    string prof_name(prof_tmp);
-    string stud_name(stud_tmp);
-
-    cout << prof_name << endl;
-    cout << stud_name << endl;
-
-    string image = "/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Photos/" + stud_name + ".jpg";
+    string prof_name = "victor";
+    string stud_name = "gabriel";
+    string image = "../Photos/" + stud_name + ".jpeg";
 
     Mat frame = imread(image);
-    if(!frame.data){
-        cout <<  "Could not open or find the image" << endl;
-        return 0;
-    }
-    cout <<  "Image opened" << endl;
+
     namedWindow("Output-Skeleton", WINDOW_NORMAL);
 
-    readfile(&stud, "/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Photos/" + stud_name + ".txt");
-    readfile(&prof, "/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Photos/" + prof_name + ".txt");
-    readfile(&video_prof, "/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Videos/" + prof_name + ".txt");
-
-    Point2f offset = prof[1] - stud[1];
-
-    vector<float> d_prof(nPoints);
-    vector<float> d_stud(nPoints);
-    vector<float> factor(nPoints);
-
-    for (int n = 0; n < nPoints; n++){
-        factor[n] = d_stud[n]/d_prof[n];
-    }
-
-    d_prof = distance_measure(prof);
-    d_stud = distance_measure(stud);
-
-    for (int n = 0; n < nPoints; n++){
-        factor[n] = d_stud[n]/d_prof[n];
-        cout << factor[n] << endl;
-    }
+    readfile(&stud, "../Photos/" + stud_name + ".txt");
+    readfile(&prof, "../Photos/" + prof_name + ".txt");
+    readfile(&video_prof, "../Test_files/" + prof_name + ".txt");
 
     ofstream ip;
-    ip.open("/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Videos/" + prof_name + "_" + stud_name + ".txt");
+    ip.open("../Test_files/" + prof_name + "_" + stud_name + ".txt");
 
     int n_frames = (int) video_prof.size()/stud.size();
     for (int j = 0; j < n_frames; j++){
@@ -220,7 +179,7 @@ int main(int argc, char* argv[]){
             prof[n] = video_prof[n + n_joints*j];
         }
 
-        prof = resize_funtion(prof, factor, offset);
+        prof = resize_funtion(prof, stud);
 
         for (int n=0; n < n_joints; n++){
             ip << prof[n].x << " ";
@@ -230,7 +189,8 @@ int main(int argc, char* argv[]){
     }
     
     ip.close();
-    cout << stud_name << endl;
     cout << "finished" << endl;
     return 0;
+
+
 }

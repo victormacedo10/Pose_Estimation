@@ -244,7 +244,7 @@ void MainWindow::on_startBtn_pressed()
     cout << "Start grabbing, press space on Live window to terminate" << endl;
 
     ifstream ip;
-    string file_addr = "../../Test_files/" + prof_name + "_gabriel.txt";
+    string file_addr = "../../Videos/" + prof_name + "_gabriel.txt";
     const char* file_addr1 = file_addr.c_str();
     ip.open(file_addr1);
     if(!ip.is_open()){
@@ -324,11 +324,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     if(video.isOpened())
     {
-        QMessageBox::warning(this,
-                             "Warning",
-                             "Stop the video before closing the application!");
         video.release();
-        event->ignore();
     }
     else
     {

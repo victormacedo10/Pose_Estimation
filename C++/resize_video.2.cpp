@@ -27,6 +27,7 @@ const int POSE_PAIRS[17][2] =
 int nPoints = 17;
 
 vector<float> angle_measure(vector<Point> points){
+    cout << "angulos:" << endl;
     double x, y, angle;
     vector<float> thetas(nPoints);
     for (int n = 0; n < nPoints; n++){
@@ -51,7 +52,7 @@ vector<float> angle_measure(vector<Point> points){
             }
             else if(angle < 0){
                 if(x<0 && y>0){
-                    angle +=180;
+                    angle += 180;
                 }
             }
             else{
@@ -65,14 +66,17 @@ vector<float> angle_measure(vector<Point> points){
                     if (y>0){
                         angle = 90;
                     }
-                    if (y<0){
+                    if (y<=0){
                         angle = -90;
                     }
                 }
             }
             thetas[n] = angle;
         }
+        cout << thetas[n] << endl;
     }
+    cout << "finish" << endl;
+    cout << endl;
     return thetas;
 }
 
@@ -158,40 +162,23 @@ vector<Point> resize_funtion(vector<Point> prof, vector<float> factor, Point2f o
     return prof;
 }
 
-int main(int argc, char* argv[]){ 
-
-    int n_joints = 18;
+int main(int argc, char **argv){ 
 
     vector<Point> prof(0);
     vector<Point> stud(0);
     vector<Point> video_prof(0);
 
-    const char* prof_tmp = "victor";
-    const char* stud_tmp = "gabriel";
-    if(argc>2){
-        cout << "in" << endl;
-        prof_tmp = argv[1];
-        stud_tmp = argv[2];
-    }
-    string prof_name(prof_tmp);
-    string stud_name(stud_tmp);
-
-    cout << prof_name << endl;
-    cout << stud_name << endl;
-
-    string image = "/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Photos/" + stud_name + ".jpg";
+    string prof_name = "victor";
+    string stud_name = "gabriel";
+    string image = "../Photos/" + stud_name + ".jpeg";
 
     Mat frame = imread(image);
-    if(!frame.data){
-        cout <<  "Could not open or find the image" << endl;
-        return 0;
-    }
-    cout <<  "Image opened" << endl;
+
     namedWindow("Output-Skeleton", WINDOW_NORMAL);
 
-    readfile(&stud, "/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Photos/" + stud_name + ".txt");
-    readfile(&prof, "/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Photos/" + prof_name + ".txt");
-    readfile(&video_prof, "/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Videos/" + prof_name + ".txt");
+    readfile(&stud, "../Photos/" + stud_name + ".txt");
+    readfile(&prof, "../Photos/" + prof_name + ".txt");
+    readfile(&video_prof, "../Test_files/" + prof_name + ".txt");
 
     Point2f offset = prof[1] - stud[1];
 
@@ -199,38 +186,60 @@ int main(int argc, char* argv[]){
     vector<float> d_stud(nPoints);
     vector<float> factor(nPoints);
 
-    for (int n = 0; n < nPoints; n++){
-        factor[n] = d_stud[n]/d_prof[n];
-    }
-
     d_prof = distance_measure(prof);
     d_stud = distance_measure(stud);
 
     for (int n = 0; n < nPoints; n++){
         factor[n] = d_stud[n]/d_prof[n];
-        cout << factor[n] << endl;
     }
 
-    ofstream ip;
-    ip.open("/home/victor/Materiais UnB/9 semestre/Embarcados/Pose_Estimation-master/Videos/" + prof_name + "_" + stud_name + ".txt");
+    int j = 1;
 
-    int n_frames = (int) video_prof.size()/stud.size();
-    for (int j = 0; j < n_frames; j++){
-        for (int n = 0; n < n_joints; n++){
-            prof[n] = video_prof[n + n_joints*j];
-        }
-
-        prof = resize_funtion(prof, factor, offset);
-
-        for (int n=0; n < n_joints; n++){
-            ip << prof[n].x << " ";
-            ip << prof[n].y << endl;
-        }
-        cout << j + 1 << "/" << n_frames << endl;
+    for (int n = 0; n < nPoints+1; n++){
+        prof[n] = video_prof[n + (nPoints+1)*j];
     }
-    
-    ip.close();
-    cout << stud_name << endl;
-    cout << "finished" << endl;
+
+    for (int n = 0; n < nPoints-4; n++){
+
+        Point2f partA = prof[POSE_PAIRS[n][0]];
+        Point2f partB = prof[POSE_PAIRS[n][1]];
+        Point2f partC = prof[8];
+        if (n == 6){
+            partC.x = (partB.x + partC.x)/2;
+            partC.y = (partB.y + partC.y)/2;
+            line(frame, partA, partC, Scalar(0, 0, 0), 1);
+        }
+        else{
+            line(frame, partA, partB, Scalar(0, 0, 0), 1);
+            circle(frame, partA, 1, Scalar(0,0,255), -1);
+            circle(frame, partB, 1, Scalar(0,0,255), -1);
+        }
+        circle(frame, partC, 1, Scalar(0,0,255), -1);
+    }
+
+    prof = resize_funtion(prof, factor, offset);
+
+    for (int n = 0; n < nPoints-4; n++){
+
+        Point2f partA = prof[POSE_PAIRS[n][0]];
+        Point2f partB = prof[POSE_PAIRS[n][1]];
+        Point2f partC = prof[8];
+        if (n == 6){
+            partC.x = (partB.x + partC.x)/2;
+            partC.y = (partB.y + partC.y)/2;
+            line(frame, partA, partC, Scalar(0, 255, 255), 1);
+        }
+        else{
+            line(frame, partA, partB, Scalar(0, 255, 255), 1);
+            circle(frame, partA, 1, Scalar(0,255,0), -1);
+            circle(frame, partB, 1, Scalar(0,255,0), -1);
+        }
+        circle(frame, partC, 1, Scalar(0,255,0), -1);
+    }
+
+    cout << "imshow" << endl;
+    imshow("Output-Skeleton",frame);
+    waitKey();
+
     return 0;
 }

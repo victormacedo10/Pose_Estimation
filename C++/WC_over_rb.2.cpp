@@ -47,12 +47,13 @@ void* playback(void* dummy_ptr)
 
 int main(int argc, char **argv)
 { 
+
 	pthread_t thread_id1;
 	pthread_create (&thread_id1, NULL, &playback, NULL);
 
 	int key, m=1, i=0;
 
-	int xc=0, yc=0;
+	int xc=0, yc=0, xs=0, ys=0;
 
 	float size = 1;
 
@@ -60,11 +61,6 @@ int main(int argc, char **argv)
 	
     int nPoints = 18;
     double x, y;
-
-    string prof_name = "victor";
-    string resize_addr = "./resize_video_general " + prof_name;
-    const char* resize_addr1 = resize_addr.c_str();
-    system(resize_addr1);
 
 	VideoCapture cap(0);
 	if (!cap.isOpened()) {
@@ -75,12 +71,11 @@ int main(int argc, char **argv)
 	int fps = cap.get(CAP_PROP_FPS);
     cout << fps << endl;
 
-	Mat frame2;
+	Mat frame;
 	cout << "Start grabbing, press space on Live window to terminate" << endl;
 	
 	ifstream ip;
-    //ip.open("../Videos/" + prof_name + "_gabriel.txt");
-    ip.open("../Videos/victor_gabriel.txt");
+    ip.open("../Test_files/gabriel_victor.txt");
     if(!ip.is_open()){
         cout << "file does not exists:" << '\n';
     }
@@ -99,37 +94,15 @@ int main(int argc, char **argv)
 	x=0;
 	y=0;
 
-	int width_frame = cap.get(CAP_PROP_FRAME_WIDTH);
-	int height_frame = cap.get(CAP_PROP_FRAME_HEIGHT);
-
-	Point2f part_m = points[11];
-	int xs = int(width_frame/2) - part_m.x;
-	int ys = int(height_frame/2) - part_m.y;
-	xc = xs;
-	yc = ys;
-
 	while(1) {
 
-		cap >> frame2;
-		flip(frame2,frame2,1);
+		cap >> frame;
+		flip(frame,frame,1);
 
-		if (frame2.empty()) {
+		if (frame.empty()) {
 			cerr << "ERROR: Unable to grab from the camera" << endl;
 			break;
 		}
-
-		Point2f partB = points[j+POSE_PAIRS[9][1]];
-		Point2f partC = points[j+8];
-		partB.x = (partB.x + x)*size + xs;
-		partB.y = (partB.y + y)*size + ys;
-		partC.x = (partC.x + x)*size + xs;
-		partC.y = (partC.y + y)*size + ys;
-
-		partB.x = (partB.x + partC.x)/2;
-		partB.y = (partB.y + partC.y)/2;
-
-		xs += partB.x - xc;
-		ys += partB.y - yc;
 
 		for (int n = 0; n < nPoints-5; n++){
 
@@ -157,58 +130,19 @@ int main(int argc, char **argv)
 			if (partA.x<=0 || partA.y<=0 || partB.x<=0 || partB.y<=0)
 						    continue;
 
-			line(frame2, partA, partB, Scalar(0,0,0), 3);
-			circle(frame2, partA, 3, Scalar(0,0,255), -1);
-			circle(frame2, partB, 3, Scalar(0,0,255), -1);
+			line(frame, partA, partB, Scalar(0,0,0), 3);
+			circle(frame, partA, 3, Scalar(0,0,255), -1);
+			circle(frame, partB, 3, Scalar(0,0,255), -1);
 		}
 
-		imshow("Live",frame2);
-		key = cv::waitKey(1);
-		if (key==120){
-		    break;
-		}
-		else if(key>=49 && key<=57){
-			m = 2*(key - 48);
-		}
-		else if(key==81){
-			for (int n = 0; n < nPoints; n++){
-				x -= m;
-			}
-		}
-		else if(key==83){
-			for (int n = 0; n < nPoints; n++){
-				x += m;
-			}
-		}
-		else if(key==84){
-			for (int n = 0; n < nPoints; n++){
-				y += m;
-			}
-		}
-		else if(key==82){
-			for (int n = 0; n < nPoints; n++){
-				y -= m;
-			}
-		}
-		else if(key==32){
-			play = 1;
-		}
-		else if(key==171){
-			if(size<5)
-				size+=0.02;
-		}
-		else if(key==173){
-			if(size>0){
-				size-=0.02;
-			}
-		}
-
+		imshow("Live",frame);
+		waitKey(1);
 	}
 
 	cout << "Closing the camera" << endl;
 	cap.release();
 	destroyAllWindows();
 	cout << "bye!" <<endl;
-	cout << frame2.size();
+	cout << frame.size();
 	return 0;
 }
